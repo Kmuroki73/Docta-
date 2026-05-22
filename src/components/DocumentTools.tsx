@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import { ArrowLeftRight, Layers, Minimize2, Scissors, Lock, Printer, PenTool, CreditCard as Edit3, CheckCircle, RefreshCw, Download, Plus, Trash2, FileText, Image, Music, Video, Table, Stamp, Shield, Crop, RotateCw, Type, Palette } from 'lucide-react';
-import type { ToolTab, ConversionFormat } from '../types';
-import type { UploadedFile } from '../types';
+import {
+  ArrowLeftRight, Layers, Minimize2, Scissors, Lock, Printer, PenTool,
+  CreditCard as Edit3, CheckCircle, RefreshCw, Download, Plus, Trash2,
+  FileText, Image, Music, Video, Table, Stamp, Shield, Crop, RotateCw, Type, Palette
+} from 'lucide-react';
+import type { ToolTab, ConversionFormat, UploadedFile } from '../types';
 import DropZone from './DropZone';
 
 interface DocumentToolsProps {
@@ -11,41 +14,41 @@ interface DocumentToolsProps {
 }
 
 const toolTabs: { id: ToolTab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { id: 'convert', label: 'Convert', icon: ArrowLeftRight },
-  { id: 'merge', label: 'Merge', icon: Layers },
+  { id: 'convert',  label: 'Convert',  icon: ArrowLeftRight },
+  { id: 'merge',    label: 'Merge',    icon: Layers },
   { id: 'compress', label: 'Compress', icon: Minimize2 },
-  { id: 'split', label: 'Split', icon: Scissors },
-  { id: 'protect', label: 'Protect', icon: Lock },
-  { id: 'edit', label: 'Edit', icon: Edit3 },
-  { id: 'sign', label: 'Sign', icon: PenTool },
-  { id: 'print', label: 'Print', icon: Printer },
+  { id: 'split',    label: 'Split',    icon: Scissors },
+  { id: 'protect',  label: 'Protect',  icon: Lock },
+  { id: 'edit',     label: 'Edit',     icon: Edit3 },
+  { id: 'sign',     label: 'Sign',     icon: PenTool },
+  { id: 'print',    label: 'Print',    icon: Printer },
 ];
 
-const outputFormats: { format: ConversionFormat; label: string; icon: React.ComponentType<{ className?: string }>; desc: string }[] = [
-  { format: 'pdf', label: 'PDF', icon: FileText, desc: 'Universal document format' },
-  { format: 'docx', label: 'Word', icon: FileText, desc: 'Microsoft Word document' },
-  { format: 'xlsx', label: 'Excel', icon: Table, desc: 'Spreadsheet format' },
-  { format: 'pptx', label: 'PowerPoint', icon: FileText, desc: 'Presentation slides' },
-  { format: 'txt', label: 'Plain Text', icon: Type, desc: 'Simple text file' },
-  { format: 'html', label: 'HTML', icon: FileText, desc: 'Web page format' },
-  { format: 'markdown', label: 'Markdown', icon: FileText, desc: 'Markdown document' },
-  { format: 'jpg', label: 'JPEG Image', icon: Image, desc: 'Compressed image' },
-  { format: 'png', label: 'PNG Image', icon: Image, desc: 'Lossless image' },
-  { format: 'svg', label: 'SVG', icon: Image, desc: 'Vector graphic' },
-  { format: 'mp3', label: 'MP3 Audio', icon: Music, desc: 'Extract audio' },
-  { format: 'mp4', label: 'MP4 Video', icon: Video, desc: 'Video format' },
+const outputFormats: { format: ConversionFormat; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { format: 'pdf',      label: 'PDF',        icon: FileText },
+  { format: 'docx',     label: 'Word',       icon: FileText },
+  { format: 'xlsx',     label: 'Excel',      icon: Table },
+  { format: 'pptx',     label: 'PowerPoint', icon: FileText },
+  { format: 'txt',      label: 'Text',       icon: Type },
+  { format: 'html',     label: 'HTML',       icon: FileText },
+  { format: 'markdown', label: 'Markdown',   icon: FileText },
+  { format: 'jpg',      label: 'JPEG',       icon: Image },
+  { format: 'png',      label: 'PNG',        icon: Image },
+  { format: 'svg',      label: 'SVG',        icon: Image },
+  { format: 'mp3',      label: 'MP3',        icon: Music },
+  { format: 'mp4',      label: 'MP4',        icon: Video },
 ];
 
 function StatusBadge({ status }: { status: 'idle' | 'processing' | 'done' | 'error' }) {
   if (status === 'idle') return null;
-  const config = {
-    processing: { color: 'text-blue-400 bg-blue-500/10', label: 'Processing...', spin: true },
-    done: { color: 'text-green-400 bg-green-500/10', label: 'Complete', spin: false },
-    error: { color: 'text-red-400 bg-red-500/10', label: 'Error', spin: false },
+  const cfg = {
+    processing: { color: 'text-blue-400 bg-blue-500/10 border-blue-500/20', label: 'Processing...', spin: true },
+    done:       { color: 'text-green-400 bg-green-500/10 border-green-500/20', label: 'Done', spin: false },
+    error:      { color: 'text-red-400 bg-red-500/10 border-red-500/20', label: 'Error', spin: false },
   };
-  const c = config[status];
+  const c = cfg[status];
   return (
-    <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${c.color}`}>
+    <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border ${c.color}`}>
       {c.spin ? <RefreshCw className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
       {c.label}
     </span>
@@ -55,45 +58,47 @@ function StatusBadge({ status }: { status: 'idle' | 'processing' | 'done' | 'err
 export default function DocumentTools({ file, files, onFiles }: DocumentToolsProps) {
   const [activeTab, setActiveTab] = useState<ToolTab>('convert');
   const [selectedFormat, setSelectedFormat] = useState<ConversionFormat>('pdf');
-  const [conversionStatus, setConversionStatus] = useState<'idle' | 'processing' | 'done' | 'error'>('idle');
-  const [_mergeFiles] = useState<string[]>([]);
+  const [status, setStatus] = useState<'idle' | 'processing' | 'done' | 'error'>('idle');
   const [splitPages, setSplitPages] = useState('1-3,4-6,7-');
   const [password, setPassword] = useState('');
-  const [compressionLevel, setCompressionLevel] = useState(70);
-  const [printCopies, setPrintCopies] = useState(1);
-  const [printLayout, setPrintLayout] = useState('portrait');
+  const [compression, setCompression] = useState(70);
+  const [copies, setCopies] = useState(1);
+  const [layout, setLayout] = useState('portrait');
 
-  function simulateAction() {
-    setConversionStatus('processing');
-    setTimeout(() => setConversionStatus('done'), 2000);
+  function simulate() {
+    setStatus('processing');
+    setTimeout(() => setStatus('done'), 2000);
   }
+
+  const TabBar = () => (
+    <div className="flex overflow-x-auto scrollbar-none border-b border-white/5 flex-shrink-0">
+      {toolTabs.map(tab => {
+        const Icon = tab.icon;
+        const active = activeTab === tab.id;
+        return (
+          <button
+            key={tab.id}
+            onClick={() => { setActiveTab(tab.id); setStatus('idle'); }}
+            className={`flex items-center gap-1.5 px-3 py-3 text-xs font-medium whitespace-nowrap border-b-2 transition-all flex-shrink-0 ${
+              active ? 'border-blue-400 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Icon className="w-3.5 h-3.5" />
+            {tab.label}
+          </button>
+        );
+      })}
+    </div>
+  );
 
   if (!file) {
     return (
-      <div className="flex-1 flex flex-col min-h-0">
-        <div className="flex gap-1 px-4 pt-4 pb-2 overflow-x-auto">
-          {toolTabs.map(tab => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
-                  activeTab === tab.id ? 'bg-blue-600/25 text-blue-400 border border-blue-500/30' : 'text-slate-400 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-        <div className="flex-1 flex items-center justify-center p-8">
-          <div className="w-full max-w-lg">
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-bold text-white mb-2">Document Tools</h2>
-              <p className="text-slate-400 text-sm">Upload a document to convert, merge, compress, sign, and more.</p>
-            </div>
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <TabBar />
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+          <h2 className="text-lg font-bold text-white mb-2">Document Tools</h2>
+          <p className="text-slate-400 text-sm mb-6 max-w-xs">Upload a document to convert, merge, compress, sign, and more.</p>
+          <div className="w-full max-w-sm">
             <DropZone onFiles={onFiles} />
           </div>
         </div>
@@ -102,223 +107,178 @@ export default function DocumentTools({ file, files, onFiles }: DocumentToolsPro
   }
 
   return (
-    <div className="flex-1 flex flex-col min-h-0">
-      {/* Tabs */}
-      <div className="flex gap-1 px-4 pt-4 pb-2 overflow-x-auto border-b border-white/5">
-        {toolTabs.map(tab => {
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => { setActiveTab(tab.id); setConversionStatus('idle'); }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
-                activeTab === tab.id ? 'bg-blue-600/25 text-blue-400 border border-blue-500/30' : 'text-slate-400 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
+    <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+      <TabBar />
 
-      <div className="flex-1 overflow-y-auto p-5">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4">
 
         {/* Convert */}
         {activeTab === 'convert' && (
-          <div className="space-y-4">
-            <div>
-              <p className="text-xs text-slate-400 mb-1">Converting: <span className="text-white">{file.name}</span></p>
+          <>
+            <p className="text-xs text-slate-500">Converting: <span className="text-white font-medium break-all">{file.name}</span></p>
+            <h3 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Output Format</h3>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
+              {outputFormats.map(fmt => {
+                const Icon = fmt.icon;
+                const sel = selectedFormat === fmt.format;
+                return (
+                  <button key={fmt.format} onClick={() => setSelectedFormat(fmt.format)}
+                    className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border text-center transition-all ${
+                      sel ? 'border-blue-500/50 bg-blue-500/10 text-white' : 'border-white/8 bg-white/3 text-slate-400 hover:border-white/15 hover:bg-white/5'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span className="text-[11px] font-medium">{fmt.label}</span>
+                  </button>
+                );
+              })}
             </div>
-            <div>
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Output Format</h3>
-              <div className="grid grid-cols-2 gap-2">
-                {outputFormats.map(fmt => {
-                  const Icon = fmt.icon;
-                  return (
-                    <button
-                      key={fmt.format}
-                      onClick={() => setSelectedFormat(fmt.format)}
-                      className={`flex items-center gap-2 p-3 rounded-xl border text-left transition-all ${
-                        selectedFormat === fmt.format
-                          ? 'border-blue-500/50 bg-blue-500/10 text-white'
-                          : 'border-white/8 bg-white/3 text-slate-400 hover:border-white/15 hover:bg-white/5'
-                      }`}
-                    >
-                      <Icon className="w-4 h-4 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs font-semibold">{fmt.label}</p>
-                        <p className="text-[10px] opacity-60">{fmt.desc}</p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 pt-2">
-              <button
-                onClick={simulateAction}
-                disabled={conversionStatus === 'processing'}
-                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white py-2.5 rounded-xl text-sm font-medium transition-all"
-              >
-                {conversionStatus === 'processing' ? (
-                  <><RefreshCw className="w-4 h-4 animate-spin" /> Converting...</>
-                ) : (
-                  <><ArrowLeftRight className="w-4 h-4" /> Convert to {selectedFormat.toUpperCase()}</>
-                )}
+            <div className="flex items-center gap-2 pt-1">
+              <button onClick={simulate} disabled={status === 'processing'}
+                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white py-2.5 rounded-xl text-sm font-medium transition-all">
+                {status === 'processing'
+                  ? <><RefreshCw className="w-4 h-4 animate-spin" />Converting...</>
+                  : <><ArrowLeftRight className="w-4 h-4" />Convert to {selectedFormat.toUpperCase()}</>
+                }
               </button>
-              {conversionStatus === 'done' && (
-                <button className="flex items-center gap-1.5 bg-green-600 hover:bg-green-500 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-all">
-                  <Download className="w-4 h-4" /> Download
+              {status === 'done' && (
+                <button className="flex items-center gap-1.5 bg-green-600 hover:bg-green-500 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex-shrink-0">
+                  <Download className="w-4 h-4" />
                 </button>
               )}
             </div>
-            <StatusBadge status={conversionStatus} />
-          </div>
+            <StatusBadge status={status} />
+          </>
         )}
 
         {/* Merge */}
         {activeTab === 'merge' && (
-          <div className="space-y-4">
-            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Files to Merge</h3>
+          <>
+            <h3 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Files to Merge</h3>
             <div className="space-y-2">
-              <div className="flex items-center gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl">
-                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm">📄</div>
-                <div className="flex-1">
-                  <p className="text-sm text-white truncate">{file.name}</p>
-                  <p className="text-xs text-slate-500">Primary document</p>
+              <div className="flex items-center gap-2.5 p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+                <span className="text-lg flex-shrink-0">📄</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-white truncate font-medium">{file.name}</p>
+                  <p className="text-xs text-slate-500">Primary</p>
                 </div>
-                <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">1st</span>
+                <span className="text-[11px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full flex-shrink-0">1st</span>
               </div>
               {files.filter(f => f.id !== file.id).slice(0, 3).map((f, i) => (
-                <div key={f.id} className="flex items-center gap-2 p-3 bg-white/3 border border-white/8 rounded-xl">
-                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm">📄</div>
-                  <div className="flex-1">
+                <div key={f.id} className="flex items-center gap-2.5 p-3 bg-white/3 border border-white/8 rounded-xl">
+                  <span className="text-lg flex-shrink-0">📄</span>
+                  <div className="flex-1 min-w-0">
                     <p className="text-sm text-slate-300 truncate">{f.name}</p>
                   </div>
-                  <span className="text-xs text-slate-500">{i + 2}nd</span>
+                  <span className="text-xs text-slate-500 flex-shrink-0">{i + 2}nd</span>
                   <button className="p-1 text-slate-500 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
                 </div>
               ))}
               <button className="w-full flex items-center justify-center gap-2 p-2.5 border-2 border-dashed border-white/10 rounded-xl text-slate-400 hover:text-white hover:border-white/20 text-sm transition-all">
-                <Plus className="w-4 h-4" /> Add more files
+                <Plus className="w-4 h-4" /> Add files
               </button>
             </div>
-            <button onClick={simulateAction} className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl text-sm font-medium transition-all">
-              <Layers className="w-4 h-4" /> Merge Documents
+            <button onClick={simulate} className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl text-sm font-medium transition-all">
+              <Layers className="w-4 h-4" /> Merge
             </button>
-            <StatusBadge status={conversionStatus} />
-          </div>
+            <StatusBadge status={status} />
+          </>
         )}
 
         {/* Compress */}
         {activeTab === 'compress' && (
-          <div className="space-y-4">
-            <div className="p-4 bg-white/3 border border-white/8 rounded-xl">
-              <div className="flex justify-between text-sm mb-3">
-                <span className="text-slate-400">Original size</span>
+          <>
+            <div className="p-4 bg-white/3 border border-white/8 rounded-xl space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-400">Original</span>
                 <span className="text-white font-medium">{(file.size / 1024 / 1024).toFixed(1)} MB</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-400">Estimated output</span>
-                <span className="text-green-400 font-medium">{((file.size / 1024 / 1024) * (1 - compressionLevel / 100)).toFixed(1)} MB</span>
+                <span className="text-slate-400">Estimated</span>
+                <span className="text-green-400 font-medium">{((file.size / 1024 / 1024) * (1 - compression / 100)).toFixed(1)} MB</span>
               </div>
-              <div className="mt-3 pt-3 border-t border-white/5">
-                <div className="flex justify-between text-xs text-slate-500 mb-1">
-                  <span>Compression level</span>
-                  <span className="text-blue-400 font-medium">{compressionLevel}% reduction</span>
+              <div className="pt-2 border-t border-white/5">
+                <div className="flex justify-between text-xs text-slate-500 mb-1.5">
+                  <span>Compression</span>
+                  <span className="text-blue-400 font-medium">{compression}%</span>
                 </div>
-                <input
-                  type="range" min="10" max="90" value={compressionLevel}
-                  onChange={e => setCompressionLevel(Number(e.target.value))}
-                  className="w-full accent-blue-500"
-                />
+                <input type="range" min="10" max="90" value={compression}
+                  onChange={e => setCompression(Number(e.target.value))}
+                  className="w-full accent-blue-500" />
                 <div className="flex justify-between text-[10px] text-slate-600 mt-1">
-                  <span>Low (best quality)</span>
-                  <span>High (smallest size)</span>
+                  <span>Low (best quality)</span><span>High (smallest)</span>
                 </div>
               </div>
             </div>
-            <button onClick={simulateAction} className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl text-sm font-medium transition-all">
-              <Minimize2 className="w-4 h-4" /> Compress File
+            <button onClick={simulate} className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl text-sm font-medium transition-all">
+              <Minimize2 className="w-4 h-4" /> Compress
             </button>
-            <StatusBadge status={conversionStatus} />
-          </div>
+            <StatusBadge status={status} />
+          </>
         )}
 
         {/* Split */}
         {activeTab === 'split' && (
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Split Method</h3>
-              <div className="grid grid-cols-2 gap-2 mb-3">
-                {['By page range', 'Every N pages', 'By bookmark', 'Extract pages'].map(method => (
-                  <button key={method} className="p-2.5 bg-white/3 border border-white/8 rounded-xl text-xs text-slate-400 hover:text-white hover:border-white/15 transition-all">
-                    {method}
-                  </button>
-                ))}
-              </div>
+          <>
+            <h3 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Split Method</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {['By page range','Every N pages','By bookmark','Extract pages'].map(m => (
+                <button key={m} className="p-2.5 bg-white/3 border border-white/8 rounded-xl text-xs text-slate-400 hover:text-white hover:border-white/15 transition-all">{m}</button>
+              ))}
             </div>
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">Page ranges (e.g., 1-3, 4-6, 7-)</label>
-              <input
-                type="text" value={splitPages} onChange={e => setSplitPages(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500/50"
-              />
+              <label className="text-xs text-slate-400 mb-1.5 block">Page ranges (e.g., 1-3, 4-6, 7-)</label>
+              <input type="text" value={splitPages} onChange={e => setSplitPages(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500/50" />
             </div>
-            <button onClick={simulateAction} className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl text-sm font-medium transition-all">
-              <Scissors className="w-4 h-4" /> Split Document
+            <button onClick={simulate} className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl text-sm font-medium transition-all">
+              <Scissors className="w-4 h-4" /> Split
             </button>
-            <StatusBadge status={conversionStatus} />
-          </div>
+            <StatusBadge status={status} />
+          </>
         )}
 
         {/* Protect */}
         {activeTab === 'protect' && (
-          <div className="space-y-4">
+          <>
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">Password</label>
-              <input
-                type="password" value={password} onChange={e => setPassword(e.target.value)}
+              <label className="text-xs text-slate-400 mb-1.5 block">Password</label>
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)}
                 placeholder="Enter password..."
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500/50 placeholder-slate-600"
-              />
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500/50 placeholder-slate-600" />
             </div>
             <div>
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Permissions</h3>
-              {['Allow printing', 'Allow copying text', 'Allow editing', 'Allow annotations'].map(perm => (
-                <label key={perm} className="flex items-center gap-3 py-2 cursor-pointer">
-                  <input type="checkbox" defaultChecked={perm.includes('printing')} className="accent-blue-500" />
-                  <span className="text-sm text-slate-300">{perm}</span>
+              <h3 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Permissions</h3>
+              {['Allow printing','Allow copying','Allow editing','Allow annotations'].map(p => (
+                <label key={p} className="flex items-center gap-3 py-2.5 border-b border-white/5 last:border-0 cursor-pointer">
+                  <input type="checkbox" defaultChecked={p.includes('printing')} className="accent-blue-500 w-4 h-4" />
+                  <span className="text-sm text-slate-300">{p}</span>
                 </label>
               ))}
             </div>
             <div>
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Watermark</h3>
-              <input
-                type="text" placeholder="Add watermark text (optional)"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500/50 placeholder-slate-600"
-              />
+              <label className="text-xs text-slate-400 mb-1.5 block">Watermark text</label>
+              <input type="text" placeholder="Optional watermark..."
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500/50 placeholder-slate-600" />
             </div>
-            <button onClick={simulateAction} className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl text-sm font-medium transition-all">
+            <button onClick={simulate} className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl text-sm font-medium transition-all">
               <Shield className="w-4 h-4" /> Apply Protection
             </button>
-            <StatusBadge status={conversionStatus} />
-          </div>
+            <StatusBadge status={status} />
+          </>
         )}
 
         {/* Edit */}
         {activeTab === 'edit' && (
-          <div className="space-y-3">
-            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Edit Tools</h3>
+          <>
+            <h3 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Edit Tools</h3>
             {[
-              { icon: Type, label: 'Add/Edit Text', desc: 'Insert or modify text blocks' },
-              { icon: Image, label: 'Insert Image', desc: 'Add images to document' },
-              { icon: Palette, label: 'Redact Content', desc: 'Permanently black out sensitive text' },
-              { icon: Crop, label: 'Crop Pages', desc: 'Trim page margins' },
-              { icon: RotateCw, label: 'Rotate Pages', desc: 'Rotate individual or all pages' },
-              { icon: Stamp, label: 'Add Stamp', desc: 'Apply stamps like APPROVED, DRAFT' },
+              { icon: Type,     label: 'Add/Edit Text',    desc: 'Insert or modify text' },
+              { icon: Image,    label: 'Insert Image',     desc: 'Add images to pages' },
+              { icon: Palette,  label: 'Redact Content',   desc: 'Black out sensitive text' },
+              { icon: Crop,     label: 'Crop Pages',       desc: 'Trim page margins' },
+              { icon: RotateCw, label: 'Rotate Pages',     desc: 'Rotate pages' },
+              { icon: Stamp,    label: 'Add Stamp',        desc: 'APPROVED, DRAFT stamps' },
             ].map(tool => {
               const Icon = tool.icon;
               return (
@@ -333,72 +293,62 @@ export default function DocumentTools({ file, files, onFiles }: DocumentToolsPro
                 </button>
               );
             })}
-          </div>
+          </>
         )}
 
         {/* Sign */}
         {activeTab === 'sign' && (
-          <div className="space-y-4">
-            <div className="p-8 bg-white/3 border-2 border-dashed border-white/10 rounded-xl text-center">
+          <>
+            <div className="p-6 bg-white/3 border-2 border-dashed border-white/10 rounded-xl text-center">
               <PenTool className="w-8 h-8 text-slate-500 mx-auto mb-2" />
               <p className="text-sm text-slate-400 mb-1">Draw your signature</p>
-              <p className="text-xs text-slate-600">Click and drag to sign</p>
+              <p className="text-xs text-slate-600">Tap and drag to sign</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <button className="p-2.5 bg-white/3 border border-white/8 rounded-xl text-xs text-slate-400 hover:text-white hover:border-white/15 transition-all">
-                Upload signature image
-              </button>
-              <button className="p-2.5 bg-white/3 border border-white/8 rounded-xl text-xs text-slate-400 hover:text-white hover:border-white/15 transition-all">
-                Type signature
-              </button>
+              <button className="p-3 bg-white/3 border border-white/8 rounded-xl text-xs text-slate-400 hover:text-white hover:border-white/15 transition-all">Upload image</button>
+              <button className="p-3 bg-white/3 border border-white/8 rounded-xl text-xs text-slate-400 hover:text-white hover:border-white/15 transition-all">Type signature</button>
             </div>
-            <button onClick={simulateAction} className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl text-sm font-medium transition-all">
+            <button onClick={simulate} className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl text-sm font-medium transition-all">
               <PenTool className="w-4 h-4" /> Apply Signature
             </button>
-            <StatusBadge status={conversionStatus} />
-          </div>
+            <StatusBadge status={status} />
+          </>
         )}
 
         {/* Print */}
         {activeTab === 'print' && (
-          <div className="space-y-4">
+          <>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-slate-400 mb-1 block">Copies</label>
-                <input
-                  type="number" min="1" max="999" value={printCopies}
-                  onChange={e => setPrintCopies(Number(e.target.value))}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500/50"
-                />
+                <label className="text-xs text-slate-400 mb-1.5 block">Copies</label>
+                <input type="number" min="1" max="999" value={copies}
+                  onChange={e => setCopies(Number(e.target.value))}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500/50" />
               </div>
               <div>
-                <label className="text-xs text-slate-400 mb-1 block">Layout</label>
-                <select
-                  value={printLayout} onChange={e => setPrintLayout(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500/50"
-                >
+                <label className="text-xs text-slate-400 mb-1.5 block">Layout</label>
+                <select value={layout} onChange={e => setLayout(e.target.value)}
+                  className="w-full bg-slate-800 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500/50">
                   <option value="portrait">Portrait</option>
                   <option value="landscape">Landscape</option>
                 </select>
               </div>
             </div>
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">Pages</label>
-              <input
-                type="text" defaultValue="All" placeholder="e.g., 1-5, 8, 11-13"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500/50 placeholder-slate-600"
-              />
+              <label className="text-xs text-slate-400 mb-1.5 block">Pages</label>
+              <input type="text" defaultValue="All" placeholder="e.g. 1-5, 8"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500/50 placeholder-slate-600" />
             </div>
-            {['Double-sided', 'Collate', 'Color printing', 'Fit to page'].map(opt => (
-              <label key={opt} className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" defaultChecked={opt === 'Collate' || opt === 'Fit to page'} className="accent-blue-500" />
+            {['Double-sided','Collate','Color printing','Fit to page'].map(opt => (
+              <label key={opt} className="flex items-center gap-3 cursor-pointer py-1">
+                <input type="checkbox" defaultChecked={opt === 'Collate' || opt === 'Fit to page'} className="accent-blue-500 w-4 h-4" />
                 <span className="text-sm text-slate-300">{opt}</span>
               </label>
             ))}
             <button className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl text-sm font-medium transition-all">
-              <Printer className="w-4 h-4" /> Print Document
+              <Printer className="w-4 h-4" /> Print
             </button>
-          </div>
+          </>
         )}
       </div>
     </div>

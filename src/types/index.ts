@@ -41,6 +41,17 @@ export interface UploadedFile {
   analysisStatus: 'idle' | 'analyzing' | 'complete' | 'error';
 }
 
+export interface AutoNote {
+  id: string;
+  content: string;
+  color: string;
+  note_type: string;
+  source: string;
+  is_pinned: boolean;
+  is_auto: boolean;
+  created_at: string;
+}
+
 export interface AnalysisResult {
   key_insights: string[];
   summary: string;
