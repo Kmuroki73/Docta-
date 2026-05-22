@@ -329,7 +329,7 @@ export default function App() {
       </div>
 
       {/* Mobile bottom nav */}
-      <nav className="lg:hidden flex-shrink-0 flex items-stretch border-t border-white/8 bg-slate-900/95 backdrop-blur-xl safe-bottom">
+      <nav className="lg:hidden flex-shrink-0 flex items-stretch border-t border-white/8 bg-slate-950/95 backdrop-blur-xl safe-bottom" style={{ minHeight: '56px' }}>
         {bottomNavItems.map(item => {
           const Icon = item.icon;
           const active = view === item.id;
@@ -337,11 +337,15 @@ export default function App() {
             <button
               key={item.id}
               onClick={() => handleViewChange(item.id)}
-              className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 relative transition-colors ${active ? 'text-blue-400' : 'text-slate-500'}`}
+              className={`flex-1 flex flex-col items-center justify-center py-2 gap-1 relative transition-colors ${active ? 'text-blue-400' : 'text-slate-500'}`}
             >
-              {active && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-blue-400 rounded-full" />}
-              <Icon className="w-[18px] h-[18px]" />
-              <span className="text-[9px] font-medium">{item.label}</span>
+              {active && (
+                <div className="absolute top-0 inset-x-2 h-0.5 bg-blue-400 rounded-full" />
+              )}
+              <div className={`flex items-center justify-center w-8 h-8 rounded-xl transition-colors ${active ? 'bg-blue-500/15' : ''}`}>
+                <Icon className="w-4 h-4" />
+              </div>
+              <span className={`text-[9px] font-semibold leading-none ${active ? 'text-blue-400' : 'text-slate-600'}`}>{item.label}</span>
             </button>
           );
         })}

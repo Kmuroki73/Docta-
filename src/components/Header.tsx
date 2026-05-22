@@ -18,11 +18,11 @@ export default function Header({ onSearch, onMenuClick }: HeaderProps) {
   ];
 
   return (
-    <header className="h-14 bg-slate-900/80 backdrop-blur-xl border-b border-white/5 flex items-center px-3 sm:px-4 gap-2 z-30 relative flex-shrink-0">
+    <header className="h-12 sm:h-14 bg-slate-900/95 backdrop-blur-xl border-b border-white/5 flex items-center px-2 sm:px-4 gap-2 z-30 relative flex-shrink-0">
       {/* Mobile menu */}
       <button
         onClick={onMenuClick}
-        className="lg:hidden p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors flex-shrink-0"
+        className="lg:hidden w-9 h-9 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors flex-shrink-0"
       >
         <Menu className="w-5 h-5" />
       </button>
@@ -44,7 +44,7 @@ export default function Header({ onSearch, onMenuClick }: HeaderProps) {
           placeholder="Search documents, notes, insights..."
           value={searchValue}
           onChange={e => { setSearchValue(e.target.value); onSearch?.(e.target.value); }}
-          className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:bg-white/8 transition-all"
+          className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 transition-all"
         />
         {searchValue && (
           <button onClick={() => { setSearchValue(''); onSearch?.(''); }}
@@ -52,7 +52,7 @@ export default function Header({ onSearch, onMenuClick }: HeaderProps) {
         )}
       </div>
 
-      {/* Mobile fullscreen search */}
+      {/* Mobile fullscreen search overlay */}
       {showSearch && (
         <div className="md:hidden absolute inset-0 bg-slate-900 flex items-center px-3 gap-2 z-10">
           <Search className="w-4 h-4 text-slate-400 flex-shrink-0" />
@@ -62,22 +62,27 @@ export default function Header({ onSearch, onMenuClick }: HeaderProps) {
             className="flex-1 bg-transparent text-sm text-white placeholder-slate-500 focus:outline-none"
           />
           <button onClick={() => { setShowSearch(false); setSearchValue(''); onSearch?.(''); }}
-            className="p-2 text-slate-400 hover:text-white">
+            className="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-white rounded-xl">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
       <div className="flex items-center gap-0.5 ml-auto">
-        <button onClick={() => setShowSearch(true)} className="md:hidden p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
-          <Search className="w-5 h-5" />
+        <button
+          onClick={() => setShowSearch(true)}
+          className="md:hidden w-9 h-9 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
+        >
+          <Search className="w-4 h-4" />
         </button>
 
         <div className="relative">
-          <button onClick={() => setShowNotifications(!showNotifications)}
-            className="relative p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-500 rounded-full" />
+          <button
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="relative w-9 h-9 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
+          >
+            <Bell className="w-4 h-4" />
+            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-blue-500 rounded-full" />
           </button>
           {showNotifications && (
             <>
@@ -103,8 +108,8 @@ export default function Header({ onSearch, onMenuClick }: HeaderProps) {
             A
           </div>
           <div className="hidden sm:block text-left">
-            <p className="text-xs font-medium text-white leading-none">Alex Chen</p>
-            <p className="text-[10px] text-slate-400 mt-0.5">Pro Plan</p>
+            <p className="text-xs font-medium text-white leading-none">Alex</p>
+            <p className="text-[10px] text-slate-400 mt-0.5">Pro</p>
           </div>
         </button>
       </div>
