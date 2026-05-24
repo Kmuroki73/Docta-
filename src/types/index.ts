@@ -1,4 +1,4 @@
-export type ViewMode = 'dashboard' | 'viewer' | 'analysis' | 'tools' | 'notes' | 'media';
+export type ViewMode = 'dashboard' | 'viewer' | 'analysis' | 'tools' | 'notes' | 'media' | 'chat';
 
 export type FileCategory =
   | 'pdf'

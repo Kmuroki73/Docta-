@@ -1,4 +1,4 @@
-import { Brain, FileText, Zap, Clock, ArrowRight, Layers, Shield, Globe, Printer, Upload, Sparkles } from 'lucide-react';
+import { Brain, FileText, Zap, Clock, ArrowRight, Layers, Shield, Globe, Printer, Upload, Sparkles, MessageSquare } from 'lucide-react';
 import type { UploadedFile, ViewMode } from '../types';
 import DropZone from './DropZone';
 import { formatFileSize, getFileCategory, getCategoryBg, getCategoryColor } from '../lib/fileUtils';
@@ -12,11 +12,11 @@ interface DashboardProps {
 
 const capabilities = [
   { icon: Brain, title: 'AI Analysis', desc: 'Insights, summaries & auto notes.' },
+  { icon: MessageSquare, title: 'AI Chat', desc: 'Ask anything about your document.' },
   { icon: Zap, title: 'Convert', desc: 'PDF ↔ Word ↔ Excel ↔ Images.' },
   { icon: Layers, title: 'Merge & Split', desc: 'Combine or split documents.' },
   { icon: Shield, title: 'Protect', desc: 'Password & watermarks.' },
   { icon: Globe, title: 'Web Research', desc: 'AI finds related resources.' },
-  { icon: Printer, title: 'Print & Sign', desc: 'Print layouts & e-signatures.' },
 ];
 
 const fileIconMap: Record<string, string> = {
@@ -34,14 +34,15 @@ export default function Dashboard({ files, onFiles, onSelectFile, onViewChange }
 
         {/* Hero */}
         <div>
+          <p className="text-[11px] font-semibold text-blue-400 uppercase tracking-widest mb-1.5">AI-Powered Document Intelligence</p>
           <h1 className="text-xl sm:text-2xl font-bold text-white leading-tight">
             Your documents,{' '}
             <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">supercharged</span>
           </h1>
-          <p className="text-slate-400 text-sm mt-1">AI insights, conversions, and auto-generated notes.</p>
+          <p className="text-slate-400 text-sm mt-1.5 leading-relaxed">Upload any file — PDF, Word, image, video, audio — and get instant AI insights, chat, and notes.</p>
         </div>
 
-        {/* Stats row */}
+        {/* Stats */}
         <div className="grid grid-cols-4 gap-2">
           {[
             { label: 'Docs', value: files.length, icon: FileText, color: 'text-blue-400', bg: 'bg-blue-500/10' },
@@ -67,19 +68,32 @@ export default function Dashboard({ files, onFiles, onSelectFile, onViewChange }
 
         {/* Analyze CTA */}
         {hasReady && (
-          <button
-            onClick={() => onViewChange('analysis')}
-            className="w-full flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border border-blue-500/30 hover:border-blue-400/50 transition-all active:scale-[0.98]"
-          >
-            <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-5 h-5 text-blue-400" />
-            </div>
-            <div className="flex-1 text-left">
-              <p className="text-sm font-semibold text-white">Analyze with AI</p>
-              <p className="text-xs text-slate-400 mt-0.5">Get insights, summary & auto notes</p>
-            </div>
-            <ArrowRight className="w-4 h-4 text-blue-400 flex-shrink-0" />
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => onViewChange('analysis')}
+              className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-blue-600/15 border border-blue-500/30 hover:border-blue-400/50 transition-all active:scale-[0.98]"
+            >
+              <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-4 h-4 text-blue-400" />
+              </div>
+              <div className="text-left min-w-0">
+                <p className="text-xs font-semibold text-white">Analyze</p>
+                <p className="text-[10px] text-slate-400">AI insights + notes</p>
+              </div>
+            </button>
+            <button
+              onClick={() => onViewChange('chat')}
+              className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-cyan-600/15 border border-cyan-500/30 hover:border-cyan-400/50 transition-all active:scale-[0.98]"
+            >
+              <div className="w-8 h-8 rounded-xl bg-cyan-500/20 flex items-center justify-center flex-shrink-0">
+                <MessageSquare className="w-4 h-4 text-cyan-400" />
+              </div>
+              <div className="text-left min-w-0">
+                <p className="text-xs font-semibold text-white">Chat</p>
+                <p className="text-[10px] text-slate-400">Ask questions</p>
+              </div>
+            </button>
+          </div>
         )}
 
         {/* Recent files */}
@@ -138,6 +152,11 @@ export default function Dashboard({ files, onFiles, onSelectFile, onViewChange }
                 );
               })}
             </div>
+            {files.length > 6 && (
+              <button className="w-full mt-2 text-xs text-blue-400 hover:text-blue-300 flex items-center justify-center gap-1 py-2">
+                View all {files.length} files <ArrowRight className="w-3 h-3" />
+              </button>
+            )}
           </div>
         )}
 
@@ -152,7 +171,7 @@ export default function Dashboard({ files, onFiles, onSelectFile, onViewChange }
 
         {/* Capabilities */}
         <div>
-          <h2 className="text-sm font-semibold text-white mb-3">What Docta Can Do</h2>
+          <h2 className="text-sm font-semibold text-white mb-3">What DocToPDF AI Can Do</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {capabilities.map(cap => {
               const Icon = cap.icon;
@@ -165,6 +184,30 @@ export default function Dashboard({ files, onFiles, onSelectFile, onViewChange }
               );
             })}
           </div>
+        </div>
+
+        {/* Pricing teaser */}
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-white/8">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-sm font-semibold text-white">Upgrade to Pro</p>
+              <p className="text-xs text-slate-400 mt-0.5">Unlimited AI analyses & chat</p>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-bold text-white">$9<span className="text-xs text-slate-400">/mo</span></p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-1.5 mb-3">
+            {['Unlimited AI analyses', 'AI Chat history', 'Export to PDF/DOCX', 'Priority support'].map(f => (
+              <div key={f} className="flex items-center gap-1.5 text-[11px] text-slate-300">
+                <div className="w-1 h-1 rounded-full bg-blue-400 flex-shrink-0" />
+                {f}
+              </div>
+            ))}
+          </div>
+          <button className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-all active:scale-[0.98]">
+            Upgrade Now
+          </button>
         </div>
       </div>
     </div>

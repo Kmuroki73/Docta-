@@ -1,4 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
+import { AuthProvider, useAuth } from './lib/auth';
+import AuthScreen from './components/AuthScreen';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -7,13 +9,24 @@ import AIAnalysis from './components/AIAnalysis';
 import DocumentTools from './components/DocumentTools';
 import NotesPanel from './components/NotesPanel';
 import MediaPanel from './components/MediaPanel';
+import ChatPanel from './components/ChatPanel';
 import type { ViewMode, UploadedFile, AnalysisResult } from './types';
 import type { AutoNote } from './types';
 import { getFileCategory } from './lib/fileUtils';
 import { generateAnalysisFromText } from './lib/mockAnalysis';
-import { LayoutDashboard, FileText, Brain, Wrench, StickyNote, Video, X } from 'lucide-react';
+import { LayoutDashboard, FileText, Brain, Wrench, StickyNote, Video, MessageSquare, X } from 'lucide-react';
 
-export default function App() {
+const bottomNavItems = [
+  { id: 'dashboard' as ViewMode, icon: LayoutDashboard, label: 'Home' },
+  { id: 'viewer' as ViewMode, icon: FileText, label: 'Viewer' },
+  { id: 'analysis' as ViewMode, icon: Brain, label: 'AI' },
+  { id: 'chat' as ViewMode, icon: MessageSquare, label: 'Chat' },
+  { id: 'notes' as ViewMode, icon: StickyNote, label: 'Notes' },
+  { id: 'tools' as ViewMode, icon: Wrench, label: 'Tools' },
+];
+
+function AppInner() {
+  const { user, loading } = useAuth();
   const [view, setView] = useState<ViewMode>('dashboard');
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
@@ -34,8 +47,6 @@ export default function App() {
         reader.onerror = () => resolve('');
         reader.readAsText(file);
       } else {
-        // For binary files (PDF, images, etc.) we can't read actual text client-side
-        // We resolve with metadata so analysis is still file-specific
         resolve('');
       }
     });
@@ -83,7 +94,7 @@ export default function App() {
     ));
 
     const fileText = await readFileText(selectedFile.file);
-    const delay = 1500 + Math.random() * 1000;
+    const delay = 1800 + Math.random() * 1200;
 
     setTimeout(() => {
       const result = generateAnalysisFromText(
@@ -95,7 +106,6 @@ export default function App() {
 
       setAnalyses(prev => ({ ...prev, [selectedFileId]: result }));
 
-      // Auto-generate notes from the analysis
       const notes: AutoNote[] = [
         ...result.key_insights.slice(0, 3).map((insight, i) => ({
           id: `auto-insight-${i}-${Date.now()}`,
@@ -142,14 +152,20 @@ export default function App() {
     setSidebarOpen(false);
   };
 
-  const bottomNavItems = [
-    { id: 'dashboard' as ViewMode, icon: LayoutDashboard, label: 'Home' },
-    { id: 'viewer' as ViewMode, icon: FileText, label: 'Viewer' },
-    { id: 'analysis' as ViewMode, icon: Brain, label: 'AI' },
-    { id: 'tools' as ViewMode, icon: Wrench, label: 'Tools' },
-    { id: 'notes' as ViewMode, icon: StickyNote, label: 'Notes' },
-    { id: 'media' as ViewMode, icon: Video, label: 'Media' },
-  ];
+  if (loading) {
+    return (
+      <div className="h-[100dvh] flex items-center justify-center bg-slate-950">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center animate-pulse" />
+          <p className="text-xs text-slate-500">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthScreen />;
+  }
 
   return (
     <div className="h-[100dvh] flex flex-col bg-slate-950 text-white overflow-hidden">
@@ -170,10 +186,7 @@ export default function App() {
       <div className="flex flex-1 min-h-0 relative">
         {/* Mobile overlay */}
         {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black/60 z-40 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
+          <div className="fixed inset-0 bg-black/70 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
         )}
 
         {/* Sidebar */}
@@ -182,11 +195,11 @@ export default function App() {
           lg:static lg:translate-x-0 lg:z-auto lg:h-auto
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}>
-          <div className="h-full flex flex-col bg-slate-900 border-r border-white/5 w-64 lg:w-56 pt-14 lg:pt-0">
+          <div className="h-full flex flex-col bg-slate-900 border-r border-white/5 w-64 lg:w-56 pt-12 lg:pt-0">
             <div className="lg:hidden absolute top-3 right-3">
               <button
                 onClick={() => setSidebarOpen(false)}
-                className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg"
+                className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-xl"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -202,130 +215,52 @@ export default function App() {
           </div>
         </div>
 
-        {/* Main + Right panel */}
-        <div className="flex flex-1 min-w-0">
-          <main className="flex-1 flex flex-col min-w-0 min-h-0">
-            {view === 'dashboard' && (
-              <Dashboard
-                files={files}
-                onFiles={handleFiles}
-                onSelectFile={id => setSelectedFileId(id)}
-                onViewChange={setView}
-              />
-            )}
-            {view === 'viewer' && (
-              <DocumentViewer file={selectedFile} onFiles={handleFiles} />
-            )}
-            {view === 'analysis' && (
-              <AIAnalysis
-                file={selectedFile}
-                analysis={selectedAnalysis}
-                onAnalyze={handleAnalyze}
-                onFiles={handleFiles}
-                onViewNotes={() => handleViewChange('notes')}
-              />
-            )}
-            {view === 'tools' && (
-              <DocumentTools file={selectedFile} files={files} onFiles={handleFiles} />
-            )}
-            {view === 'notes' && (
-              <NotesPanel
-                file={selectedFile}
-                autoNotes={selectedAutoNotes}
-                onFiles={handleFiles}
-                onGoToAnalysis={() => handleViewChange('analysis')}
-              />
-            )}
-            {view === 'media' && (
-              <MediaPanel files={files} onFiles={handleFiles} />
-            )}
-          </main>
-
-          {/* Right context panel — desktop only */}
-          {view !== 'dashboard' && view !== 'media' && (
-            <aside className="hidden xl:flex w-60 flex-col border-l border-white/5 bg-slate-900/30 flex-shrink-0">
-              {selectedFile ? (
-                <div className="p-4 border-b border-white/5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-2xl">
-                      {selectedFile.type.startsWith('video/') ? '🎬'
-                        : selectedFile.type.startsWith('audio/') ? '🎵'
-                        : selectedFile.type.startsWith('image/') ? '🖼️' : '📄'}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-white truncate">{selectedFile.name}</p>
-                      <p className="text-[10px] text-slate-500 capitalize">{selectedFile.category}</p>
-                    </div>
-                  </div>
-                  {selectedFile.status === 'processing' && (
-                    <div className="mb-2">
-                      <div className="flex justify-between text-[10px] text-slate-500 mb-1">
-                        <span>Processing...</span>
-                        <span>{Math.round(selectedFile.progress)}%</span>
-                      </div>
-                      <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500 rounded-full transition-all duration-200" style={{ width: `${selectedFile.progress}%` }} />
-                      </div>
-                    </div>
-                  )}
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <div className="p-2 bg-white/3 rounded-lg">
-                      <p className="text-[10px] text-slate-500 mb-0.5">Size</p>
-                      <p className="text-xs text-white">{(selectedFile.size / 1024 / 1024).toFixed(1)} MB</p>
-                    </div>
-                    <div className="p-2 bg-white/3 rounded-lg">
-                      <p className="text-[10px] text-slate-500 mb-0.5">Status</p>
-                      <p className={`text-xs capitalize ${selectedFile.status === 'ready' ? 'text-green-400' : 'text-yellow-400'}`}>{selectedFile.status}</p>
-                    </div>
-                    <div className="p-2 bg-white/3 rounded-lg col-span-2">
-                      <p className="text-[10px] text-slate-500 mb-0.5">AI Analysis</p>
-                      <p className={`text-xs capitalize ${selectedFile.analysisStatus === 'complete' ? 'text-green-400' : selectedFile.analysisStatus === 'analyzing' ? 'text-blue-400' : 'text-slate-400'}`}>
-                        {selectedFile.analysisStatus === 'idle' ? 'Not started' : selectedFile.analysisStatus}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="p-4 border-b border-white/5 text-center">
-                  <p className="text-xs text-slate-500">No file selected</p>
-                </div>
-              )}
-              <div className="p-3 border-b border-white/5">
-                <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Quick Actions</p>
-                <div className="space-y-1">
-                  {([
-                    { label: 'Analyze with AI', v: 'analysis' as ViewMode, accent: true },
-                    { label: 'Open Viewer', v: 'viewer' as ViewMode },
-                    { label: 'Tools', v: 'tools' as ViewMode },
-                    { label: 'Notes', v: 'notes' as ViewMode },
-                    { label: 'Media', v: 'media' as ViewMode },
-                  ] as { label: string; v: ViewMode; accent?: boolean }[]).map(a => (
-                    <button key={a.label} onClick={() => setView(a.v)}
-                      className={`w-full text-left text-xs px-2.5 py-1.5 rounded-lg transition-all ${a.accent ? 'bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border border-blue-500/20' : view === a.v ? 'bg-white/8 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
-                      {a.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {files.length > 0 && (
-                <div className="flex-1 overflow-y-auto p-3">
-                  <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Files ({files.length})</p>
-                  <div className="space-y-1">
-                    {files.map(f => (
-                      <button key={f.id} onClick={() => setSelectedFileId(f.id)}
-                        className={`w-full flex items-center gap-2 p-1.5 rounded-lg text-left transition-all ${f.id === selectedFileId ? 'bg-white/10' : 'hover:bg-white/5'}`}>
-                        <span className="text-sm flex-shrink-0">{f.type.startsWith('video/') ? '🎬' : f.type.startsWith('audio/') ? '🎵' : f.type.startsWith('image/') ? '🖼️' : '📄'}</span>
-                        <span className="text-xs text-slate-300 truncate flex-1">{f.name}</span>
-                        {f.analysisStatus === 'complete' && <div className="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" />}
-                        {f.analysisStatus === 'analyzing' && <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse flex-shrink-0" />}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </aside>
+        {/* Main content */}
+        <main className="flex-1 flex flex-col min-w-0 min-h-0">
+          {view === 'dashboard' && (
+            <Dashboard
+              files={files}
+              onFiles={handleFiles}
+              onSelectFile={id => setSelectedFileId(id)}
+              onViewChange={setView}
+            />
           )}
-        </div>
+          {view === 'viewer' && (
+            <DocumentViewer file={selectedFile} onFiles={handleFiles} />
+          )}
+          {view === 'analysis' && (
+            <AIAnalysis
+              file={selectedFile}
+              analysis={selectedAnalysis}
+              onAnalyze={handleAnalyze}
+              onFiles={handleFiles}
+              onViewNotes={() => handleViewChange('notes')}
+              onViewChat={() => handleViewChange('chat')}
+            />
+          )}
+          {view === 'tools' && (
+            <DocumentTools file={selectedFile} files={files} onFiles={handleFiles} />
+          )}
+          {view === 'notes' && (
+            <NotesPanel
+              file={selectedFile}
+              autoNotes={selectedAutoNotes}
+              onFiles={handleFiles}
+              onGoToAnalysis={() => handleViewChange('analysis')}
+            />
+          )}
+          {view === 'media' && (
+            <MediaPanel files={files} onFiles={handleFiles} />
+          )}
+          {view === 'chat' && (
+            <ChatPanel
+              file={selectedFile}
+              analysis={selectedAnalysis}
+              onFiles={handleFiles}
+              onGoToAnalysis={() => handleViewChange('analysis')}
+            />
+          )}
+        </main>
       </div>
 
       {/* Mobile bottom nav */}
@@ -337,13 +272,11 @@ export default function App() {
             <button
               key={item.id}
               onClick={() => handleViewChange(item.id)}
-              className={`flex-1 flex flex-col items-center justify-center py-2 gap-1 relative transition-colors ${active ? 'text-blue-400' : 'text-slate-500'}`}
+              className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 relative transition-colors ${active ? 'text-blue-400' : 'text-slate-600'}`}
             >
-              {active && (
-                <div className="absolute top-0 inset-x-2 h-0.5 bg-blue-400 rounded-full" />
-              )}
-              <div className={`flex items-center justify-center w-8 h-8 rounded-xl transition-colors ${active ? 'bg-blue-500/15' : ''}`}>
-                <Icon className="w-4 h-4" />
+              {active && <div className="absolute top-0 inset-x-1 h-0.5 bg-blue-400 rounded-full" />}
+              <div className={`flex items-center justify-center w-8 h-7 rounded-xl transition-colors ${active ? 'bg-blue-500/15' : ''}`}>
+                <Icon className="w-[17px] h-[17px]" />
               </div>
               <span className={`text-[9px] font-semibold leading-none ${active ? 'text-blue-400' : 'text-slate-600'}`}>{item.label}</span>
             </button>
@@ -351,5 +284,13 @@ export default function App() {
         })}
       </nav>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppInner />
+    </AuthProvider>
   );
 }

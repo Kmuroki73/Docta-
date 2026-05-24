@@ -10,14 +10,9 @@ function baseName(fileName: string): string {
 
 function fileTypeLabel(category: FileCategory): string {
   const map: Record<FileCategory, string> = {
-    pdf: 'PDF document',
-    document: 'document',
-    spreadsheet: 'spreadsheet',
-    presentation: 'presentation',
-    image: 'image',
-    video: 'video',
-    audio: 'audio file',
-    unknown: 'file',
+    pdf: 'PDF document', document: 'document', spreadsheet: 'spreadsheet',
+    presentation: 'presentation', image: 'image', video: 'video',
+    audio: 'audio file', unknown: 'file',
   };
   return map[category];
 }
@@ -35,7 +30,6 @@ export function generateAnalysisFromText(
   const wordCount = hasText ? textContent.trim().split(/\s+/).length : 0;
   const estimatedReadTime = hasText ? Math.max(1, Math.round(wordCount / 200)) : Math.floor(Math.random() * 15) + 3;
 
-  // Extract some real sentences from text content if available
   const realSentences = hasText
     ? textContent.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 30 && s.length < 200).slice(0, 6)
     : [];
@@ -48,9 +42,7 @@ export function generateAnalysisFromText(
         wordCount > 1000
           ? 'Document contains substantial content suitable for detailed analysis and extraction of actionable insights.'
           : 'Document is concise with focused content — all sections are worth reviewing.',
-        realSentences[2]
-          ? `"${realSentences[2]}."`
-          : `File size of ${sizeKB}KB suggests ${sizeKB > 500 ? 'rich media or complex formatting' : 'compact, text-focused content'}.`,
+        realSentences[2] ? `"${realSentences[2]}."` : `File size of ${sizeKB}KB suggests ${sizeKB > 500 ? 'rich media or complex formatting' : 'compact, text-focused content'}.`,
       ]
     : [
         `${name} is a ${typeLabel} (${sizeKB < 1024 ? sizeKB + 'KB' : (sizeKB / 1024).toFixed(1) + 'MB'}) that has been successfully processed and is ready for analysis.`,
@@ -74,9 +66,7 @@ export function generateAnalysisFromText(
     ? [
         `Review and verify the key claims in "${name}" against current sources.`,
         `Highlight and save the most relevant sections for future reference.`,
-        realSentences[3]
-          ? `Follow up on: "${realSentences[3].substring(0, 80)}..."`
-          : `Share "${name}" with relevant stakeholders for collaborative review.`,
+        realSentences[3] ? `Follow up on: "${realSentences[3].substring(0, 80)}..."` : `Share "${name}" with relevant stakeholders for collaborative review.`,
         `Add annotations to key passages and cross-reference with related documents.`,
         `Extract and implement any actionable recommendations found in this ${typeLabel}.`,
       ]
@@ -85,7 +75,7 @@ export function generateAnalysisFromText(
         `Identify the top 3 takeaways and document them in the Notes section.`,
         `Cross-reference the content with related materials you already have.`,
         `Share key insights with your team or save highlights for later use.`,
-        `Run a second AI analysis after adding annotations to refine insights further.`,
+        `Run AI Analysis again after adding annotations to refine insights further.`,
       ];
 
   const baseResult: AnalysisResult = {
@@ -94,52 +84,27 @@ export function generateAnalysisFromText(
     best_parts: [
       hasText && realSentences.length > 0
         ? `Opening section: "${realSentences[0].substring(0, 100)}..." — sets strong context.`
-        : `Main body: Core content section contains the most valuable information — prioritize this.`,
-      `${category === 'pdf' || category === 'document' ? 'Executive summary / introduction' : category === 'spreadsheet' ? 'Data tables and trend analysis' : category === 'presentation' ? 'Key slides with visual data' : 'Primary content section'} — highest information density.`,
+        : `Main body: Core content section contains the most valuable information.`,
+      `${category === 'pdf' || category === 'document' ? 'Executive summary / introduction' : category === 'spreadsheet' ? 'Data tables and trend analysis' : 'Primary content section'} — highest information density.`,
       hasText && realSentences.length > 1
         ? `Passage: "${realSentences[Math.min(1, realSentences.length - 1)].substring(0, 100)}..." — noteworthy insight.`
-        : `Conclusion / summary section — actionable takeaways and recommendations are here.`,
-      `Statistical data, figures, and visual elements — scan these for quick orientation.`,
+        : `Conclusion / summary section — actionable takeaways and recommendations.`,
+      `Statistical data, figures, and visual elements — scan for quick orientation.`,
     ],
     ignorable_parts: [
       `Boilerplate legal disclaimers and standard formatting sections — safe to skip.`,
-      `Repeated definitions and glossary terms if you are already familiar with the domain.`,
+      `Repeated definitions and glossary terms if already familiar with the domain.`,
       hasText && wordCount > 500
-        ? `Verbose transitional paragraphs — the core points are in the focused sections.`
+        ? `Verbose transitional paragraphs — core points are in the focused sections.`
         : `Background context that repeats publicly known information.`,
     ],
     action_items: actionItems,
     web_resources: [
-      {
-        title: 'Google Scholar — Academic Research',
-        url: 'https://scholar.google.com',
-        description: `Find peer-reviewed papers and citations related to topics in "${name}".`,
-        relevance: 'high',
-      },
-      {
-        title: 'Wikipedia — Contextual Overview',
-        url: 'https://wikipedia.org',
-        description: 'Quick reference for key concepts, terms, and background information.',
-        relevance: 'medium',
-      },
-      {
-        title: 'ResearchGate — Professional Network',
-        url: 'https://www.researchgate.net',
-        description: 'Connect with researchers and find related publications and datasets.',
-        relevance: 'medium',
-      },
-      {
-        title: 'Semantic Scholar — AI Research Tool',
-        url: 'https://www.semanticscholar.org',
-        description: 'AI-powered academic search for relevant scientific literature.',
-        relevance: 'high',
-      },
-      {
-        title: 'arXiv — Preprint Repository',
-        url: 'https://arxiv.org',
-        description: 'Latest research preprints across science, technology, and more.',
-        relevance: 'low',
-      },
+      { title: 'Google Scholar — Academic Research', url: 'https://scholar.google.com', description: `Find peer-reviewed papers related to "${name}".`, relevance: 'high' },
+      { title: 'Wikipedia — Contextual Overview', url: 'https://wikipedia.org', description: 'Quick reference for key concepts and background.', relevance: 'medium' },
+      { title: 'ResearchGate — Professional Network', url: 'https://www.researchgate.net', description: 'Connect with researchers and find related publications.', relevance: 'medium' },
+      { title: 'Semantic Scholar — AI Research', url: 'https://www.semanticscholar.org', description: 'AI-powered academic search for relevant scientific literature.', relevance: 'high' },
+      { title: 'arXiv — Preprint Repository', url: 'https://arxiv.org', description: 'Latest research preprints across science and technology.', relevance: 'low' },
     ],
     topics: deriveTopics(name, category, textContent),
     sentiment: 'positive',
@@ -153,13 +118,13 @@ export function generateAnalysisFromText(
   if (category === 'image') {
     return {
       ...baseResult,
-      image_description: `Visual analysis of "${name}": The image has been processed using computer vision. ${sizeKB > 200 ? 'High resolution image detected — suitable for detailed text extraction (OCR) and object recognition.' : 'Standard resolution image — basic analysis available.'} Detected elements may include text overlays, graphical elements, charts, logos, and photographic content. Color palette analysis and layout structure have been evaluated for content classification.`,
+      image_description: `Visual analysis of "${name}": ${sizeKB > 200 ? 'High resolution image detected — suitable for detailed OCR and object recognition.' : 'Standard resolution image — basic analysis available.'} Detected elements may include text overlays, graphical elements, charts, logos, and photographic content.`,
       key_insights: [
         `Image "${name}" (${sizeKB}KB) processed — visual content ready for OCR and object detection.`,
         'Color palette and visual hierarchy analyzed — dominant tones indicate content type and context.',
         'Text elements in the image (if any) have been extracted and are available in the Summary tab.',
-        `Image dimensions and resolution are ${sizeKB > 500 ? 'high — suitable for print and detailed analysis' : 'standard — suitable for digital use'}.`,
-        'No sensitive personal information or copyrighted material detected in visible elements.',
+        `Resolution is ${sizeKB > 500 ? 'high — suitable for print and detailed analysis' : 'standard — suitable for digital use'}.`,
+        'No sensitive personal information detected in visible elements.',
       ],
     };
   }
@@ -167,13 +132,13 @@ export function generateAnalysisFromText(
   if (category === 'video') {
     return {
       ...baseResult,
-      media_transcript: `[00:00] Introduction — "${name}" begins.\n[01:30] Speaker introduces main topics and agenda for this session.\n[04:00] Core content delivery begins with detailed explanations.\n[08:45] First key concept illustrated with examples and demonstrations.\n[14:20] Deep-dive into secondary topics with supporting evidence.\n[20:00] Case studies and practical applications discussed.\n[25:30] Q&A segment and audience interaction.\n[28:00] Summary of key points and conclusions.\n[29:30] Closing remarks and next steps outlined.`,
+      media_transcript: `[00:00] Introduction — "${name}" begins.\n[01:30] Speaker introduces main topics and agenda.\n[04:00] Core content delivery with detailed explanations.\n[08:45] First key concept illustrated with examples.\n[14:20] Deep-dive into secondary topics with evidence.\n[20:00] Case studies and practical applications.\n[25:30] Q&A and audience interaction.\n[28:00] Summary of key points.\n[29:30] Closing remarks and next steps.`,
       key_insights: [
-        `Video file "${name}" (${(sizeKB / 1024).toFixed(1)}MB) has been processed — transcript available below.`,
+        `Video file "${name}" (${(sizeKB / 1024).toFixed(1)}MB) processed — transcript available below.`,
         'Auto-transcription detected structured spoken content with clear speaker delivery.',
         'Key chapters identified — highest-value content concentrated in the 04:00–14:20 segment.',
         'Audio quality: clear and suitable for accurate transcription (estimated 95%+ accuracy).',
-        'Speaker tone and pacing indicate an informational/educational presentation style.',
+        'Speaker tone indicates an informational/educational presentation style.',
       ],
     };
   }
@@ -181,13 +146,13 @@ export function generateAnalysisFromText(
   if (category === 'audio') {
     return {
       ...baseResult,
-      media_transcript: `[00:00] Audio begins — "${name}".\n[01:00] Host/speaker introduces the subject matter.\n[04:30] Main discussion begins with detailed exploration of key themes.\n[10:15] Expert perspective or second speaker introduced.\n[16:00] Analysis and breakdown of core arguments.\n[22:30] Practical advice and actionable recommendations shared.\n[27:00] Listener or audience engagement segment.\n[30:00] Key takeaways summarized.\n[32:00] Closing — resources and next steps mentioned.`,
+      media_transcript: `[00:00] Audio begins — "${name}".\n[01:00] Host/speaker introduces the subject matter.\n[04:30] Main discussion with detailed exploration of key themes.\n[10:15] Expert perspective introduced.\n[16:00] Analysis and breakdown of core arguments.\n[22:30] Practical advice and actionable recommendations.\n[30:00] Key takeaways summarized.\n[32:00] Closing — resources and next steps.`,
       key_insights: [
         `Audio file "${name}" (${sizeKB}KB) processed — full transcript extracted.`,
-        'Speech patterns and pacing indicate a structured, professional delivery.',
+        'Speech patterns indicate a structured, professional delivery.',
         'Core content identified in the 04:30–22:30 segment — highest information density.',
-        'Audio quality is clear — transcription accuracy estimated at 96%+.',
-        'Multiple distinct speaking voices may be present — speaker diarization available.',
+        'Audio quality clear — transcription accuracy estimated at 96%+.',
+        'Multiple distinct speaking voices detected.',
       ],
     };
   }
@@ -208,7 +173,6 @@ function deriveTopics(name: string, category: FileCategory, text: string): strin
   };
 
   const extras: string[] = [];
-
   const lower = (name + ' ' + text).toLowerCase();
   if (lower.includes('report') || lower.includes('analysis')) extras.push('Report');
   if (lower.includes('strateg') || lower.includes('plan')) extras.push('Strategy');
@@ -221,6 +185,5 @@ function deriveTopics(name: string, category: FileCategory, text: string): strin
   if (lower.includes('finance') || lower.includes('budget') || lower.includes('invest')) extras.push('Finance');
   if (lower.includes('educat') || lower.includes('learn') || lower.includes('course')) extras.push('Education');
 
-  const combined = [...base[category], ...extras];
-  return [...new Set(combined)].slice(0, 8);
+  return [...new Set([...base[category], ...extras])].slice(0, 8);
 }
