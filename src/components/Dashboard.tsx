@@ -171,7 +171,7 @@ export default function Dashboard({ files, onFiles, onSelectFile, onViewChange }
 
         {/* Capabilities */}
         <div>
-          <h2 className="text-sm font-semibold text-white mb-3">What DocToPDF AI Can Do</h2>
+          <h2 className="text-sm font-semibold text-white mb-3">What Docta PDF Can Do</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {capabilities.map(cap => {
               const Icon = cap.icon;

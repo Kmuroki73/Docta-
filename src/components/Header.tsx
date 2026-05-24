@@ -38,7 +38,7 @@ export default function Header({ onSearch, onMenuClick }: HeaderProps) {
         <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
           <Star className="w-3.5 h-3.5 text-white fill-white" />
         </div>
-        <span className="font-bold text-white text-sm sm:text-base tracking-tight">DocToPDF</span>
+        <span className="font-bold text-white text-sm sm:text-base tracking-tight">Docta PDF</span>
         <span className="hidden xs:block text-[9px] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider">AI</span>
       </div>
 

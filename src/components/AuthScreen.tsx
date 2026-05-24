@@ -45,7 +45,7 @@ export default function AuthScreen() {
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 mb-3 shadow-lg shadow-orange-500/20">
             <Star className="w-7 h-7 text-white fill-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">DocToPDF AI</h1>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Docta PDF</h1>
           <p className="text-slate-400 text-sm mt-1">AI-powered document intelligence</p>
         </div>
 
